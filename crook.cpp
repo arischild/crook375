@@ -6,6 +6,7 @@
 #include <vector>
 #include <ctime>
 #include <tgmath.h>
+#include <map>
 
 using namespace std;
 
@@ -13,6 +14,7 @@ bool valid(vector<vector <int> > grid, int i, int j);
 string gridToString(vector<vector<int> > grid);
 int countBlanks(vector<vector <int> > grid);
 vector<vector <int> > simpleSolve(vector<vector<int> > grid);
+vector<int> markup(vector<vector<int> > grid, vector<int> marks, int coordinates);
 vector<vector <int> > crook(vector<vector<int> > grid);
 
 // the n x n size of the grid
@@ -36,7 +38,7 @@ int blanks;
  * but take too long in execution to actually test.
  *
  * Command line format: ./crook <input file name> <algorithm name>
- *  <algorithm name> is either "simple" or "crook's"
+ *  <algorithm name> is either "simple" or "crooks"
  *
  * Example command line: ./crook sudoku.txt simple
  */
@@ -68,7 +70,7 @@ int main(int argc, char **argv) {
 		clock_t begin = clock();
 		blanks = countBlanks(grid);
 	    if(alg == "simple") grid = simpleSolve(grid);
-		if(alg == "crook's") grid = crook(grid);
+		if(alg == "crooks") grid = crook(grid);
 		cout << gridToString(grid);
 		clock_t end = clock();
 		double elapsed_secs = double(end - begin) / CLOCKS_PER_SEC;
@@ -167,6 +169,76 @@ vector<vector <int> > simpleSolve(vector<vector<int> > grid) {
  */
 
 vector<vector <int> > crook(vector<vector<int> > grid) {
-	// this is where crook's algorithm goes
+	map<int, vector<int> > markups;
+	vector<int> emptyCells;
+	vector<int> fullMarkup;
+	for (int i = 1; i <= n; i++) {
+		fullMarkup.push_back(i);
+	}
+	for (int i = 0; i < n; i++) {
+		for(int j = 0; j < n; j++) {
+			if (grid[i][j] == 0) {
+				int coordinates = i * 9 + j;
+				emptyCells.push_back(coordinates);
+				pair<int, vector<int> > cell = make_pair(coordinates, fullMarkup);
+				markups.insert(cell);
+			}
+		}
+	}
+	if(emptyCells.size() == 0) return grid;
+	for(int i = 0; i < emptyCells.size(); i++) {
+		int coordinates = emptyCells[i];
+		vector<int> currentMarkup = markups[coordinates];
+		markups[coordinates] = markup(grid, currentMarkup, coordinates);
+		if(markups[coordinates].size() == 1) {
+			int col = coordinates % 9;
+			int row = (coordinates - col) / 9;
+			grid[row][col] = markups[coordinates][0];
+			emptyCells.erase(emptyCells.begin() + i);
+			i = -1;
+		}
+	}
 	return grid;
 }
+
+/*
+ * Given a set of coordinates and the old markup list, this will return the updated markup
+ */
+
+vector<int> markup(vector<vector<int> > grid, vector<int> marks, int coordinates) {
+	int j = coordinates % 9;
+	int i = (coordinates - j) / 9;
+	for(int h = 0; h < marks.size(); h++) {
+		int val = marks[h];
+		bool found = false;
+		for (int k = 0; k < n && !found; k++) {
+			if ((grid[i][k] == val && k != j) || (grid[k][j] == val && k != i)) {
+				marks.erase(marks.begin() + h);
+				h--;
+				found = true;
+			}
+		}
+		if(!found) {
+			int root = sqrt(n);
+			int boxRowStart = i/root * root; // find first row in box
+			int boxColStart = j/root * root; // find first row in column
+			for (int k = boxRowStart; k < boxRowStart + root; k++) {
+				for (int q = boxColStart; q < boxColStart + root && !found; q++) {
+					if (grid[k][q] == val && !(k == i && q == j)) { // check each value in box
+						marks.erase(marks.begin() + h);
+						h--;
+						found = true;
+					}
+				}
+			}
+		}
+	}
+	cout << i << " " << j << endl;
+	for(int h = 0; h < marks.size(); h++) {
+		cout << marks[h] << " ";
+	}
+	cout << endl;
+	return marks;
+}
+
+
