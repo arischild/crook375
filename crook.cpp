@@ -226,12 +226,6 @@ vector<vector <int> > crook(vector<vector<int> > grid) {
 								markups[tempCoordinates].erase(markups[tempCoordinates].begin() + h);
 								h--;
 								i = -1;
-								//print
-								cout << row << " " << j << ": ";
-								for(int z = 0; z < markups[tempCoordinates].size(); z++) {
-									cout << markups[tempCoordinates][z] << " ";
-								}	
-								cout << endl;
 							}
 						}
 					}
@@ -257,12 +251,6 @@ vector<vector <int> > crook(vector<vector<int> > grid) {
 								markups[tempCoordinates].erase(markups[tempCoordinates].begin() + h);
 								h--;
 								i = -1;
-								//print
-								cout << j << " " << col << ": ";
-								for(int z = 0; z < markups[tempCoordinates].size(); z++) {
-									cout << markups[tempCoordinates][z] << " ";
-								}	
-								cout << endl;
 							}
 						}
 					}
@@ -294,12 +282,6 @@ vector<vector <int> > crook(vector<vector<int> > grid) {
 									markups[tempCoordinates].erase(markups[tempCoordinates].begin() + x);
 									x--;
 									i = -1;
-									//print
-									cout << k << " " << h << ": ";
-									for(int z = 0; z < markups[tempCoordinates].size(); z++) {
-										cout << markups[tempCoordinates][z] << " ";
-									}	
-									cout << endl;
 								}
 							}
 						}
@@ -311,7 +293,6 @@ vector<vector <int> > crook(vector<vector<int> > grid) {
 			grid[row][col] = marks[0];
 			emptyCells.erase(emptyCells.begin() + i);
 			i = -1;
-			cout << row << " " << col << ": " << "cell is now " << marks[0] << endl;
 		}
 	}
 	if(emptyCells.size() != 0) {
@@ -360,21 +341,5 @@ vector<int> markup(vector<vector<int> > grid, vector<int> marks, int coordinates
 			}
 		}
 	}
-	cout << i << " " << j << ": ";
-	for(int h = 0; h < marks.size(); h++) {
-		cout << marks[h] << " ";
-	}
-	cout << endl;
 	return marks;
 }
-/*
-7 1 0 0 0 4 0 0 0 
-0 0 5 3 0 0 0 0 0 
-0 0 0 0 8 2 9 7 0 
-2 3 4 8 0 0 7 0 0 
-0 0 0 0 0 0 0 0 0 
-5 0 1 0 3 9 8 4 2 
-0 5 9 2 6 0 0 8 7 
-0 0 0 0 0 8 2 0 0 
-0 0 0 5 0 0 0 6 1 
-*/
