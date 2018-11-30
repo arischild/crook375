@@ -39,6 +39,8 @@ int blanks;
  * proper input. For now only 4x4's and 9x9's work properly. 16x16's work theoretically, 
  * but take too long in execution to actually test.
  *
+ * This program assumes correct input, including a solvable sudoku. If the sudoku is not solvable, a segfault may occur.
+ *
  * Command line format: ./crook <input file name> <algorithm name>
  *  <algorithm name> is either "simple" or "crooks"
  *
@@ -188,6 +190,7 @@ vector<vector <int> > crook(vector<vector<int> > grid) {
 			}
 		}
 	}
+	fullMarkup.clear();
 	for(int i = 0; i < emptyCells.size(); i++) {
 		int coordinates = emptyCells[i];
 		vector<int> currentMarkup = markups[coordinates];
@@ -306,6 +309,8 @@ vector<vector <int> > crook(vector<vector<int> > grid) {
 		}
 
 	}
+	emptyCells.clear();
+	markups.clear();
 	return grid;
 }
 
