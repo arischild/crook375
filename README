@@ -1,9 +1,22 @@
-I have done this assignment
-completely on my own. I have not copied it, nor have I given my solution to anyone else. I
-understand that if I am involved in plagiarism or cheating I will have to sign an official form that
-I have cheated and that this form will be stored in my official university record. I also understand
-that I will receive a grade of 0 for the involved assignment for my first offense and that I will
-receive a grade of “F” for the course for any additional offense.
+ Input file format: first line contains the value of n for the n x n the grid, followed by  the sudoku itself,
+ with each value separated by a space, and each row seperated by a new line. blank spaces are represented as 0.
+Example input file:
+ 4
+ 0 2 0 4
+ 4 1 2 0
+ 0 4 0 0
+ 0 0 4 0
+
+ Acceptable values of n must have a natural number square root. Program assumes 
+ proper input. For now only 4x4's and 9x9's work properly. 16x16's work theoretically, 
+ but take too long in execution to actually test.
+
+ This program assumes correct input, including a solvable sudoku. If the sudoku is not solvable, a segfault may occur.
+
+ Command line format: ./crook <input file name> <algorithm name>
+   <algorithm name> is either "simple" or "crooks"
+
+ Example command line: ./crook sudoku.txt simple
 
 
 C++
