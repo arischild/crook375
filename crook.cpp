@@ -7,6 +7,7 @@
 #include <ctime>
 #include <tgmath.h>
 #include <map>
+#include <algorithm>
 
 using namespace std;
 
@@ -15,6 +16,7 @@ string gridToString(vector<vector<int> > grid);
 int countBlanks(vector<vector <int> > grid);
 vector<vector <int> > simpleSolve(vector<vector<int> > grid);
 vector<int> markup(vector<vector<int> > grid, vector<int> marks, int coordinates);
+map<int, vector<int> > update(vector<vector<int> > grid, map<int, vector <int> > markups, vector<int> emptyCells, int coordinates);
 vector<vector <int> > crook(vector<vector<int> > grid);
 
 // the n x n size of the grid
@@ -172,42 +174,167 @@ vector<vector <int> > crook(vector<vector<int> > grid) {
 	map<int, vector<int> > markups;
 	vector<int> emptyCells;
 	vector<int> fullMarkup;
+	// initial markups
 	for (int i = 1; i <= n; i++) {
 		fullMarkup.push_back(i);
 	}
 	for (int i = 0; i < n; i++) {
 		for(int j = 0; j < n; j++) {
 			if (grid[i][j] == 0) {
-				int coordinates = i * 9 + j;
+				int coordinates = i * n + j;
 				emptyCells.push_back(coordinates);
 				pair<int, vector<int> > cell = make_pair(coordinates, fullMarkup);
 				markups.insert(cell);
 			}
 		}
 	}
-	if(emptyCells.size() == 0) return grid;
 	for(int i = 0; i < emptyCells.size(); i++) {
 		int coordinates = emptyCells[i];
 		vector<int> currentMarkup = markups[coordinates];
 		markups[coordinates] = markup(grid, currentMarkup, coordinates);
 		if(markups[coordinates].size() == 1) {
-			int col = coordinates % 9;
-			int row = (coordinates - col) / 9;
+			int col = coordinates % n;
+			int row = (coordinates - col) / n;
 			grid[row][col] = markups[coordinates][0];
 			emptyCells.erase(emptyCells.begin() + i);
 			i = -1;
 		}
 	}
+	if(emptyCells.size() == 0) return grid;
+	// time for some preemptive set hunting
+	for(int i = 0; i < emptyCells.size(); i++) {
+		int baseCoordinates = emptyCells[i];
+		vector<int> marks = markups[baseCoordinates];
+		int col = baseCoordinates % n;
+		int row = (baseCoordinates - col) / n;
+		int m = marks.size();
+		vector<int> PESet;
+		for (int j = 0; j < n; j++) {
+			int tempCoordinates = (row * n) + j;
+			if(count(emptyCells.begin(), emptyCells.end(), tempCoordinates) == 1 && marks == markups[tempCoordinates]) {
+				m--;
+				PESet.push_back(tempCoordinates);
+			}
+		}
+		if (m == 0) {
+			for (int j = 0; j < n; j++) {
+				int tempCoordinates = (row * n) + j;
+				if (count(emptyCells.begin(), emptyCells.end(), tempCoordinates) == 1 && count(PESet.begin(), PESet.end(), tempCoordinates) == 0) {
+					for (int k = 0; k < marks.size(); k++) {
+						for (int h = 0; h < markups[tempCoordinates].size(); h++) {
+							if (marks[k] == markups[tempCoordinates][h]) {
+								markups[tempCoordinates].erase(markups[tempCoordinates].begin() + h);
+								h--;
+								i = -1;
+								//print
+								cout << row << " " << j << ": ";
+								for(int z = 0; z < markups[tempCoordinates].size(); z++) {
+									cout << markups[tempCoordinates][z] << " ";
+								}	
+								cout << endl;
+							}
+						}
+					}
+				}
+			}
+		}
+		m = marks.size();
+		PESet.clear();
+		for (int j = 0; j < n; j++) {
+			int tempCoordinates = (j * n) + col;
+			if(count(emptyCells.begin(), emptyCells.end(), tempCoordinates) == 1 && marks == markups[tempCoordinates]) {
+				m--;
+				PESet.push_back(tempCoordinates);
+			}
+		}
+		if (m == 0) {
+			for (int j = 0; j < n; j++) {
+				int tempCoordinates = (j * n) + col;
+				if (count(emptyCells.begin(), emptyCells.end(), tempCoordinates) == 1 && count(PESet.begin(), PESet.end(), tempCoordinates) == 0) {
+					for (int k = 0; k < marks.size(); k++) {
+						for (int h = 0; h < markups[tempCoordinates].size(); h++) {
+							if (marks[k] == markups[tempCoordinates][h]) {
+								markups[tempCoordinates].erase(markups[tempCoordinates].begin() + h);
+								h--;
+								i = -1;
+								//print
+								cout << j << " " << col << ": ";
+								for(int z = 0; z < markups[tempCoordinates].size(); z++) {
+									cout << markups[tempCoordinates][z] << " ";
+								}	
+								cout << endl;
+							}
+						}
+					}
+				}
+			}
+		}
+		m = marks.size();
+		PESet.clear();
+		int root = sqrt(n);
+		int boxRowStart = row/root * root; // find first row in box
+		int boxColStart = col/root * root; // find first row in column
+		for (int k = boxRowStart; k < boxRowStart + root; k++) {
+			for (int h = boxColStart; h < boxColStart + root; h++) {
+				int tempCoordinates = (k * n) + h;
+				if(count(emptyCells.begin(), emptyCells.end(), tempCoordinates) == 1 && marks == markups[tempCoordinates]) {
+					m--;
+					PESet.push_back(tempCoordinates);
+				}
+			}
+		}
+		if (m == 0) {
+			for (int k = boxRowStart; k < boxRowStart + root; k++) {
+				for (int h = boxColStart; h < boxColStart + root; h++) {
+					int tempCoordinates = (k * n) + h;
+					if (count(emptyCells.begin(), emptyCells.end(), tempCoordinates) == 1 && count(PESet.begin(), PESet.end(), tempCoordinates) == 0) {
+						for (int q = 0; q < marks.size(); q++) {
+							for (int x = 0; x < markups[tempCoordinates].size(); x++) {
+								if (marks[q] == markups[tempCoordinates][x]) {
+									markups[tempCoordinates].erase(markups[tempCoordinates].begin() + x);
+									x--;
+									i = -1;
+									//print
+									cout << k << " " << h << ": ";
+									for(int z = 0; z < markups[tempCoordinates].size(); z++) {
+										cout << markups[tempCoordinates][z] << " ";
+									}	
+									cout << endl;
+								}
+							}
+						}
+					}
+				}
+			}
+		}
+		if (marks.size() == 1) {
+			grid[row][col] = marks[0];
+			emptyCells.erase(emptyCells.begin() + i);
+			i = -1;
+			cout << row << " " << col << ": " << "cell is now " << marks[0] << endl;
+		}
+	}
+	if(emptyCells.size() != 0) {
+		int coordinates = emptyCells[0];
+		int col = coordinates % n;
+		int row = (coordinates - col) / n;
+		for(int i = 0; i < markups[coordinates].size(); i++) {
+			grid[row][col] = markups[coordinates][i];
+			vector<vector <int> > testGrid = crook(grid);
+			if(countBlanks(testGrid) == 0) return testGrid;
+		}
+
+	}
 	return grid;
 }
 
 /*
- * Given a set of coordinates and the old markup list, this will return the updated markup
+ * Given a set of coordinates of a cell and the old markup list, this will return the updated markup for the given cell
  */
 
 vector<int> markup(vector<vector<int> > grid, vector<int> marks, int coordinates) {
-	int j = coordinates % 9;
-	int i = (coordinates - j) / 9;
+	int j = coordinates % n;
+	int i = (coordinates - j) / n;
 	for(int h = 0; h < marks.size(); h++) {
 		int val = marks[h];
 		bool found = false;
@@ -233,12 +360,21 @@ vector<int> markup(vector<vector<int> > grid, vector<int> marks, int coordinates
 			}
 		}
 	}
-	cout << i << " " << j << endl;
+	cout << i << " " << j << ": ";
 	for(int h = 0; h < marks.size(); h++) {
 		cout << marks[h] << " ";
 	}
 	cout << endl;
 	return marks;
 }
-
-
+/*
+7 1 0 0 0 4 0 0 0 
+0 0 5 3 0 0 0 0 0 
+0 0 0 0 8 2 9 7 0 
+2 3 4 8 0 0 7 0 0 
+0 0 0 0 0 0 0 0 0 
+5 0 1 0 3 9 8 4 2 
+0 5 9 2 6 0 0 8 7 
+0 0 0 0 0 8 2 0 0 
+0 0 0 5 0 0 0 6 1 
+*/
