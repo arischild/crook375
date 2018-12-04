@@ -115,9 +115,16 @@ string gridToString(vector<vector< int> > grid) {
 	string retval = "";
 	for (int i = 0; i < n; i++) {
 		for (int j = 0; j < n; j++) {
+			if ((j % ((int)sqrt(n)) == 0) && j != 0) retval += "|";
 			retval += to_string(grid[i][j]) + " ";
 		}
-	retval += '\n';
+		if (((i+1) % ((int)sqrt(n) ) == 0) && i != n-1) {
+			retval += "\n";
+			for (int j = 0; j < n + sqrt(n) - 1; j++) {
+				retval += "— ";
+			}
+		}
+		retval += '\n';
 	}
 	return retval;
 }

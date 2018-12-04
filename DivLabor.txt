@@ -1,0 +1,11 @@
+We divided the work as follows:
+
+Ari: Formatting and crook's algorithm
+
+Dan: Brute Force Algorithm 
+
+George: Slides and test cases
+
+All 3 of us worked on debugging together.
+
+I have no complaints about the division of labor. I had a great time!
